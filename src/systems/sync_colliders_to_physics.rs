@@ -1,8 +1,16 @@
 use std::marker::PhantomData;
 
 use specs::{
-    storage::ComponentEvent, world::Index, Join, ReadStorage, ReaderId, Resources, System,
-    SystemData, WriteExpect, WriteStorage,
+    storage::ComponentEvent,
+    world::Index,
+    Join,
+    ReadStorage,
+    ReaderId,
+    Resources,
+    System,
+    SystemData,
+    WriteExpect,
+    WriteStorage,
 };
 
 use crate::{
@@ -10,7 +18,8 @@ use crate::{
     colliders::PhysicsCollider,
     nalgebra::RealField,
     nphysics::object::{BodyPartHandle, ColliderDesc},
-    Physics, PhysicsParent,
+    Physics,
+    PhysicsParent,
 };
 
 use super::iterate_component_events;
@@ -248,8 +257,12 @@ mod tests {
     use specs::{world::Builder, DispatcherBuilder, World};
 
     use crate::{
-        colliders::Shape, nalgebra::Isometry3, systems::SyncCollidersToPhysicsSystem, Physics,
-        PhysicsColliderBuilder, SimplePosition,
+        colliders::Shape,
+        nalgebra::Isometry3,
+        systems::SyncCollidersToPhysicsSystem,
+        Physics,
+        PhysicsColliderBuilder,
+        SimplePosition,
     };
 
     #[test]
