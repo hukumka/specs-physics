@@ -15,6 +15,7 @@ use specs::{
 };
 
 use crate::{
+    types::from_isometry3,
     bodies::{PhysicsBody, Position},
     nalgebra::RealField,
     Physics,
@@ -151,7 +152,7 @@ fn add_rigid_body<N, P>(
     // handle for later usage
     let handle = physics_body
         .to_rigid_body_desc()
-        .position(*position.isometry())
+        .position(from_isometry3(position.isometry()))
         .user_data(id)
         .build(&mut physics.world)
         .handle();
@@ -184,7 +185,7 @@ fn update_rigid_body<N, P>(
 
         // the Position was modified, update the position directly
         if modified_positions.contains(id) {
-            rigid_body.set_position(*position.isometry());
+            rigid_body.set_position(from_isometry3(position.isometry()));
         }
 
         trace!(

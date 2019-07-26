@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 use specs::{Join, ReadExpect, Resources, System, SystemData, WriteStorage};
 
 use crate::{
+    types::to_isometry3,
     bodies::{PhysicsBody, Position},
     nalgebra::RealField,
     Physics,
@@ -35,7 +36,7 @@ where
             // if a RigidBody exists in the nphysics World we fetch it and update the
             // Position component accordingly
             if let Some(rigid_body) = physics.world.rigid_body(physics_body.handle.unwrap()) {
-                position.set_isometry(rigid_body.position());
+                position.set_isometry(&to_isometry3(rigid_body.position()));
                 physics_body.update_from_physics_world(rigid_body);
             }
         }

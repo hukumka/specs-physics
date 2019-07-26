@@ -3,7 +3,8 @@ use std::{f32::consts::PI, fmt, ops::Deref};
 use specs::{Component, DenseVecStorage, FlaggedStorage};
 
 use crate::{
-    nalgebra::{DMatrix, Isometry3, Point2, Point3, RealField, Unit, Vector3},
+    types::{Vector, Isometry},
+    nalgebra::{DMatrix, Point2, Point3, RealField, Unit},
     ncollide::{
         shape::{
             Ball,
@@ -62,20 +63,20 @@ pub enum Shape<N: RealField> {
         radius: N,
     },
     Compound {
-        parts: Vec<(Isometry3<N>, Shape<N>)>,
+        parts: Vec<(Isometry<N>, Shape<N>)>,
     },
     ConvexHull {
         points: Vec<Point3<N>>,
     },
     Cuboid {
-        half_extents: Vector3<N>,
+        half_extents: Vector<N>,
     },
     HeightField {
         heights: DMatrix<N>,
-        scale: Vector3<N>,
+        scale: Vector<N>,
     },
     Plane {
-        normal: Unit<Vector3<N>>,
+        normal: Unit<Vector<N>>,
     },
     Polyline {
         points: Vec<Point3<N>>,
@@ -142,7 +143,7 @@ impl<N: RealField> Shape<N> {
 pub struct PhysicsCollider<N: RealField> {
     pub(crate) handle: Option<ColliderHandle>,
     pub shape: Shape<N>,
-    pub offset_from_parent: Isometry3<N>,
+    pub offset_from_parent: Isometry<N>,
     pub density: N,
     pub material: MaterialHandle<N>,
     pub margin: N,
@@ -219,7 +220,7 @@ impl<N: RealField> PhysicsCollider<N> {
 /// ```
 pub struct PhysicsColliderBuilder<N: RealField> {
     shape: Shape<N>,
-    offset_from_parent: Isometry3<N>,
+    offset_from_parent: Isometry<N>,
     density: N,
     material: MaterialHandle<N>,
     margin: N,
@@ -235,7 +236,7 @@ impl<N: RealField> From<Shape<N>> for PhysicsColliderBuilder<N> {
     fn from(shape: Shape<N>) -> Self {
         Self {
             shape,
-            offset_from_parent: Isometry3::identity(),
+            offset_from_parent: Isometry::identity(),
             density: N::from_f32(1.3).unwrap(),
             material: MaterialHandle::new(BasicMaterial::default()),
             margin: N::from_f32(0.2).unwrap(), // default was: 0.01
@@ -249,7 +250,7 @@ impl<N: RealField> From<Shape<N>> for PhysicsColliderBuilder<N> {
 
 impl<N: RealField> PhysicsColliderBuilder<N> {
     /// Sets the `offset_from_parent` value of the `PhysicsColliderBuilder`.
-    pub fn offset_from_parent(mut self, offset_from_parent: Isometry3<N>) -> Self {
+    pub fn offset_from_parent(mut self, offset_from_parent: Isometry<N>) -> Self {
         self.offset_from_parent = offset_from_parent;
         self
     }

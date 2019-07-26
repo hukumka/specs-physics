@@ -16,10 +16,12 @@ keywords = ["specs", "nphysics", "nphysics3d"]
 [lib]
 name = "specs_physics3d"
 path = "../src/lib.rs"
+required_features = ["dim3"]
 
 [features]
-default = []
+default = ["dim3"]
 
+dim3 = []
 amethyst = ["amethyst_core"]
 
 [dependencies]

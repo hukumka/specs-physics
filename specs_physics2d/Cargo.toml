@@ -16,11 +16,13 @@ keywords = ["specs", "nphysics", "nphysics3d"]
 [lib]
 name = "specs_physics2d"
 path = "../src/lib.rs"
+required_features = ["dim2"]
 
 [features]
-default = []
+default = ["dim2"]
 
 amethyst = ["amethyst_core"]
+dim2 = []
 
 [dependencies]
 log = "0.4.6"
@@ -35,4 +37,8 @@ objekt = "0.1.2"
 
 [dev-dependencies]
 simple_logger = "1.2.0"
+
+[[example]]
+name = "basic2d"
+path = "examples/basic.rs"
 

@@ -43,24 +43,24 @@
 //!
 //! ```rust
 //! use specs::{Component, DenseVecStorage, FlaggedStorage};
-//! use specs_physics::{bodies::Position, nalgebra::Isometry3};
+//! use specs_physics::{bodies::Position, Isometry};
 //!
-//! struct Pos(pub Isometry3<f32>);
+//! struct Pos(pub Isometry<f32>);
 //!
 //! impl Component for Pos {
 //!     type Storage = FlaggedStorage<Self, DenseVecStorage<Self>>;
 //! }
 //!
 //! impl Position<f32> for Pos {
-//!     fn isometry(&self) -> &Isometry3<f32> {
+//!     fn isometry(&self) -> &Isometry<f32> {
 //!         &self.0
 //!     }
 //!
-//!     fn isometry_mut(&mut self) -> &mut Isometry3<f32> {
+//!     fn isometry_mut(&mut self) -> &mut Isometry<f32> {
 //!         &mut self.0
 //!     }
 //!
-//!     fn set_isometry(&mut self, isometry: &Isometry3<f32>) -> &mut Pos {
+//!     fn set_isometry(&mut self, isometry: &Isometry<f32>) -> &mut Pos {
 //!         self.0 = *isometry;
 //!         self
 //!     }
@@ -240,8 +240,16 @@
 extern crate log;
 
 pub use nalgebra;
+#[cfg(feature="dim3")]
 pub use ncollide3d as ncollide;
+#[cfg(feature="dim3")]
 pub use nphysics3d as nphysics;
+
+#[cfg(feature="dim2")]
+pub use ncollide2d as ncollide;
+#[cfg(feature="dim2")]
+pub use nphysics2d as nphysics;
+
 pub use shrev;
 
 use std::collections::HashMap;
@@ -264,7 +272,7 @@ pub use self::{
 
 use self::{
     bodies::Position,
-    nalgebra::{RealField, Vector3},
+    nalgebra::RealField,
     nphysics::{
         counters::Counters,
         material::MaterialsCoefficientsTable,
@@ -281,11 +289,14 @@ use self::{
     },
 };
 
+pub mod types;
 pub mod bodies;
 pub mod colliders;
 pub mod events;
 pub mod parameters;
 pub mod systems;
+
+use types::Vector;
 
 /// Resource holding the internal fields where physics computation occurs.
 /// Some inspection methods are exposed to allow debugging.
@@ -317,7 +328,7 @@ impl<N: RealField> Physics<N> {
 
     /// Reports the internal value for the gravity.
     /// See also `Gravity` for setting this value.
-    pub fn gravity(&self) -> &Vector3<N> {
+    pub fn gravity(&self) -> &Vector<N> {
         self.world.gravity()
     }
 

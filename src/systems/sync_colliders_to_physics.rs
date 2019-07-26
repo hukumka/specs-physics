@@ -14,6 +14,7 @@ use specs::{
 };
 
 use crate::{
+    types::from_isometry3,
     bodies::Position,
     colliders::PhysicsCollider,
     nalgebra::RealField,
@@ -182,11 +183,11 @@ fn add_collider<N, P>(
     // Position into consideration
     let translation = if parent_part_handle.is_ground() {
         // let scale = 1.0; may be added later
-        let iso = &mut position.isometry().clone();
+        let mut iso = from_isometry3(position.isometry());
         iso.translation.vector +=
             iso.rotation * physics_collider.offset_from_parent.translation.vector; //.component_mul(scale);
         iso.rotation *= physics_collider.offset_from_parent.rotation;
-        *iso
+        iso
     } else {
         physics_collider.offset_from_parent
     };
