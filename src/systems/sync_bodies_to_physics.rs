@@ -232,11 +232,16 @@ mod tests {
             .build();
         dispatcher.setup(&mut world.res);
 
+        #[cfg(feature="dim3")]
+        let z = 1.0;
+        // Current contract requires z=0
+        #[cfg(feature="dim2")]
+        let z = 0.0;
         // create an Entity with the PhysicsBody component and execute the dispatcher
         world
             .create_entity()
             .with(SimplePosition::<f32>(Isometry3::<f32>::translation(
-                1.0, 1.0, 1.0,
+                1.0, 1.0, z,
             )))
             .with(PhysicsBodyBuilder::<f32>::from(BodyStatus::Dynamic).build())
             .build();

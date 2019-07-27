@@ -4,7 +4,7 @@ extern crate simple_logger;
 use specs::world::{Builder, World};
 use specs_physics2d::{
     colliders::Shape,
-    nalgebra::{Isometry2, Vector2},
+    nalgebra::{Isometry3, Vector2},
     nphysics::object::BodyStatus,
     physics_dispatcher,
     PhysicsBodyBuilder,
@@ -27,13 +27,13 @@ fn main() {
     // create an Entity containing the required Components
     world
         .create_entity()
-        .with(SimplePosition::<f32>(Isometry2::<f32>::translation(
-            1.0, 1.0
+        .with(SimplePosition::<f32>(Isometry3::<f32>::translation(
+            1.0, 1.0, 0.0
         )))
         .with(PhysicsBodyBuilder::<f32>::from(BodyStatus::Dynamic).build())
         .with(
-            PhysicsColliderBuilder::<f32>::from(Shape::Rectangle {
-                half_extents: Vector3::new(1.0, 1.0),
+            PhysicsColliderBuilder::<f32>::from(Shape::Cuboid {
+                half_extents: Vector2::new(1.0, 1.0),
             })
             .build(),
         )

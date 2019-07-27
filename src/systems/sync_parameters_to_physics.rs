@@ -82,11 +82,14 @@ mod tests {
     use specs::{DispatcherBuilder, World};
 
     use crate::{
-        nalgebra::Vector3,
         parameters::Gravity,
         systems::SyncParametersToPhysicsSystem,
         Physics,
     };
+    #[cfg(feature="dim3")]
+    use crate::nalgebra::Vector3;
+    #[cfg(feature="dim2")]
+    use crate::nalgebra::Vector2;
 
     #[test]
     fn update_gravity() {
@@ -100,12 +103,18 @@ mod tests {
             .build();
         dispatcher.setup(&mut world.res);
 
+        #[cfg(feature="dim3")]
         world.add_resource(Gravity(Vector3::<f32>::new(1.0, 2.0, 3.0).into()));
+        #[cfg(feature="dim2")]
+        world.add_resource(Gravity(Vector2::<f32>::new(1.0, 2.0).into()));
+
         dispatcher.dispatch(&mut world.res);
 
         let physics = world.read_resource::<Physics<f32>>();
         assert_eq!(physics.world.gravity().x, 1.0);
         assert_eq!(physics.world.gravity().y, 2.0);
+
+        #[cfg(feature="dim3")]
         assert_eq!(physics.world.gravity().z, 3.0);
     }
 
