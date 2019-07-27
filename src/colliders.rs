@@ -3,22 +3,19 @@ use std::{f32::consts::PI, fmt, ops::Deref};
 use specs::{Component, DenseVecStorage, FlaggedStorage};
 
 use crate::{
-    types::{Vector, Isometry},
-    nalgebra::{DMatrix, Point2, Point3, RealField, Unit},
+    types::{Vector, Isometry, Point},
+    nalgebra::{Point2, RealField, Unit},
     ncollide::{
         shape::{
             Ball,
             Capsule,
             Compound,
-            ConvexHull,
             Cuboid,
             HeightField,
             Plane,
             Polyline,
             Segment,
             ShapeHandle,
-            TriMesh,
-            Triangle,
         },
         world::CollisionGroups,
     },
@@ -28,7 +25,19 @@ use crate::{
     },
 };
 
-pub type MeshData<N> = (Vec<Point3<N>>, Vec<Point3<usize>>, Option<Vec<Point2<N>>>);
+#[cfg(feature="dim3")]
+use crate::{
+    ncollide::shape::{ConvexHull, Triangle, TriMesh},
+    nalgebra::DMatrix,
+};
+
+#[cfg(feature="dim2")]
+use crate::{
+    ncollide::shape::ConvexPolygon,
+    nalgebra::DVector,
+};
+
+pub type MeshData<N> = (Vec<Point<N>>, Vec<Point<usize>>, Option<Vec<Point2<N>>>);
 
 pub trait IntoMesh: objekt::Clone + Send + Sync {
     type N: RealField;
@@ -65,34 +74,44 @@ pub enum Shape<N: RealField> {
     Compound {
         parts: Vec<(Isometry<N>, Shape<N>)>,
     },
+    #[cfg(feature="dim3")]
     ConvexHull {
-        points: Vec<Point3<N>>,
+        points: Vec<Point<N>>,
+    },
+    #[cfg(feature="dim2")]
+    ConvexPolygon {
+        points: Vec<Point<N>>,
     },
     Cuboid {
         half_extents: Vector<N>,
     },
     HeightField {
+        #[cfg(feature="dim3")]
         heights: DMatrix<N>,
+        #[cfg(feature="dim2")]
+        heights: DVector<N>,
         scale: Vector<N>,
     },
     Plane {
         normal: Unit<Vector<N>>,
     },
     Polyline {
-        points: Vec<Point3<N>>,
+        points: Vec<Point<N>>,
         indices: Option<Vec<Point2<usize>>>,
     },
     Segment {
-        a: Point3<N>,
-        b: Point3<N>,
+        a: Point<N>,
+        b: Point<N>,
     },
+    #[cfg(feature="dim3")]
     TriMesh {
         handle: Box<dyn IntoMesh<N = N>>,
     },
+    #[cfg(feature="dim3")]
     Triangle {
-        a: Point3<N>,
-        b: Point3<N>,
-        c: Point3<N>,
+        a: Point<N>,
+        b: Point<N>,
+        c: Point<N>,
     },
 }
 
@@ -113,8 +132,14 @@ impl<N: RealField> Shape<N> {
                     .map(|part| (part.0, part.1.handle()))
                     .collect(),
             )),
+            #[cfg(feature="dim3")]
             Shape::ConvexHull { points } => ShapeHandle::new(
                 ConvexHull::try_from_points(&points)
+                    .expect("Failed to generate Convex Hull from points."),
+            ),
+            #[cfg(feature="dim2")]
+            Shape::ConvexPolygon { points } => ShapeHandle::new(
+                ConvexPolygon::try_from_points(&points)
                     .expect("Failed to generate Convex Hull from points."),
             ),
             Shape::Cuboid { half_extents } => ShapeHandle::new(Cuboid::new(*half_extents)),
@@ -126,10 +151,12 @@ impl<N: RealField> Shape<N> {
                 ShapeHandle::new(Polyline::new(points.clone(), indices.clone()))
             }
             Shape::Segment { a, b } => ShapeHandle::new(Segment::new(*a, *b)),
+            #[cfg(feature="dim3")]
             Shape::TriMesh { handle } => {
                 let data = handle.points();
                 ShapeHandle::new(TriMesh::new(data.0, data.1, data.2))
             }
+            #[cfg(feature="dim3")]
             Shape::Triangle { a, b, c } => ShapeHandle::new(Triangle::new(*a, *b, *c)),
         }
     }
